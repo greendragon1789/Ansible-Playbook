@@ -1,0 +1,10 @@
+---
+- hosts: Sudo_without_pass
+  become_user: root
+  tasks:
+  - name: Do with sudo permission without typing password
+    lineinfile:
+      path: /etc/sudoers
+      insertbefore: '## Allows members of the users group to mount and unmount the'
+      line: 'longdiep	ALL=(ALL)	NOPASSWD: ALL'
+    become: yes
