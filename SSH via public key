@@ -1,0 +1,37 @@
+---
+- hosts: SSH_pass
+  become_user: root
+  tasks:
+  - name: Create .ssh folder for LongDiep
+    file:
+      path: ~/.ssh
+      state: directory
+      owner: longdiep
+      group: longdiep
+      mode: 0700
+
+  - name: Create authorized_keys file (public key) for LongDiep
+    copy:
+      src: /home/longdiep/authorized_keys
+      dest: ~/.ssh/authorized_keys
+      owner: longdiep
+      group: longdiep
+      mode: 0600
+
+  - name: Edit in SSH configure
+    replace:
+      path: /etc/ssh/sshd_config
+      regexp: "{{ item.regexp }}"
+      replace: "{{ item.replace }}"
+    loop:
+      - { regexp: '#PermitRootLogin yes', replace: 'PermitRootLogin no' }
+      - { regexp: '#PubkeyAuthentication yes', replace: 'PubkeyAuthentication yes' }
+      - { regexp: 'PasswordAuthentication yes', replace: 'PasswordAuthentication no' }
+      - { regexp: 'UsePAM yes', replace: 'UsePAM no' }
+    become: yes
+
+  - name: Reload SSH service
+    service:
+      name: sshd
+      state: reloaded
+    become: yes
