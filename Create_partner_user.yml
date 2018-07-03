@@ -1,0 +1,32 @@
+---
+- hosts: SSH_key
+
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter the user name of partner"
+      private: no
+
+  vars:
+    user_name: "{{ username }}"
+
+  become_user: root
+  tasks:
+  - name: Create group
+    group:
+      name: "{{ user_name }}"
+      state: present
+    become: yes
+
+  - name: Create user {{ user_name }}
+    user:
+      name: "{{ user_name }}"
+      groups: "{{ user_name }}"
+      state: present
+    become: yes
+
+  - name: set authorized key for {{ user_name }}
+    authorized_key:
+      user: "{{ user_name }}"
+      state: present
+      key: "{{ lookup('file', '/mnt/d/Dropbox/Data/Partner_PublicKey/{{ user_name }}') }}"
+    become: yes
